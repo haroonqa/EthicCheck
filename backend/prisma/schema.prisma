@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model alias {
+  id         String    @id
+  company_id String
+  name       String
+  type       AliasType
+  source_id  String?
+  company    company   @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@unique([company_id, name, type])
+  @@index([name])
+  @@index([type, name])
+}
+
+model arms_rank {
+  id               String  @id
+  company_id       String
+  sipri_rank       Int?
+  arms_revenue_usd Float?
+  year             Int
+  source_id        String
+  company          company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  source           source  @relation(fields: [source_id], references: [id], onDelete: Cascade)
+
+  @@unique([company_id, year])
+  @@index([year])
+}
+
+model company {
+  id            String          @id
+  cik           String?         @unique
+  isin          String?         @unique
+  figi          String?         @unique
+  ticker        String?         @unique
+  name          String
+  country       String?
+  active        Boolean         @default(true)
+  last_updated  DateTime        @default(now())
+  alias         alias[]
+  arms_rank     arms_rank[]
+  contracts     contracts[]
+  etf_holding   etf_holding[]
+  evidence      evidence[]
+  financials    financials[]
+  screen_result screen_result[]
+  company_score company_score[]
+}
+
+model company_score {
+  id          String   @id
+  company_id  String
+  topic       FilterType
+  score       Int      // 0-100 risk score
+  status      String   // "pass", "fail", "review", "excluded"
+  updated_at  DateTime @updatedAt
+  company     company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@unique([company_id, topic])
+  @@index([topic, score])
+}
+
+model contracts {
+  id           String   @id
+  company_id   String
+  agency       String
+  psc          String?
+  naics        String?
+  amount_usd   Float
+  period_start DateTime
+  period_end   DateTime
+  source_id    String
+  company      company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  source       source   @relation(fields: [source_id], references: [id], onDelete: Cascade)
+}
+
+model disputes {
+  id           String        @id
+  audit_id     String
+  message      String
+  evidence_url String?
+  status       DisputeStatus @default(OPEN)
+  created_at   DateTime      @default(now())
+  resolved_at  DateTime?
+  resolution   String?
+}
+
+model etf {
+  id                 String        @id
+  symbol             String        @unique
+  name               String
+  provider           String
+  last_holdings_date DateTime
+  etf_holding        etf_holding[]
+}
+
+model etf_holding {
+  id                   String   @id
+  etf_id               String
+  child_isin_or_ticker String
+  weight               Float
+  lookthrough_level    Int
+  as_of                DateTime
+  company              company  @relation(fields: [child_isin_or_ticker], references: [ticker])
+  etf                  etf      @relation(fields: [etf_id], references: [id], onDelete: Cascade)
+}
+
+model evidence {
+  id           String           @id
+  company_id   String
+  tag_id       String
+  source_id    String
+  strength     EvidenceStrength
+  notes        String?
+  observed_at  DateTime         @default(now())
+  bds_category String?
+  company      company          @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  source       source           @relation(fields: [source_id], references: [id], onDelete: Cascade)
+  tag          tag              @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id, bds_category, observed_at])
+  @@index([bds_category, strength])
+  @@unique([company_id, source_id])
+}
+
+model financials {
+  id              String  @id
+  company_id      String
+  period          String
+  debt            Float?
+  cash_securities Float?
+  receivables     Float?
+  market_cap      Float?
+  source_id       String
+  company         company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  source          source  @relation(fields: [source_id], references: [id], onDelete: Cascade)
+}
+
+model screen_result {
+  id            String     @id
+  audit_id      String     @unique
+  company_id    String
+  symbol        String
+  verdict       Verdict
+  statuses_json Json
+  reasons_json  Json
+  confidence    Confidence
+  as_of         DateTime
+  created_at    DateTime   @default(now())
+  company       company    @relation(fields: [company_id], references: [id], onDelete: Cascade)
+}
+
+model screen_rule {
+  id             String     @id
+  filter         FilterType
+  code           String
+  description    String
+  threshold_json Json
+  version        String
+  active_bool    Boolean    @default(true)
+}
+
+model settings {
+  key        String @id
+  value_json Json
+}
+
+model source {
+  id            String       @id
+  domain        String
+  title         String
+  url           String       @unique
+  publisher     String?
+  snapshot_path String?
+  fetched_at    DateTime     @default(now())
+  hash          String?
+  arms_rank     arms_rank[]
+  contracts     contracts[]
+  evidence      evidence[]
+  financials    financials[]
+
+  @@index([domain])
+}
+
+model tag {
+  id          String     @id
+  name        TagName
+  subtype     String?
+  description String?
+  evidence    evidence[]
+}
+
+enum AliasType {
+  BRAND
+  SUBSIDIARY
+  TICKER
+}
+
+enum Confidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum EvidenceStrength {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum FilterType {
+  BDS
+  DEFENSE
+  SURVEILLANCE
+  SHARIAH
+}
+
+enum TagName {
+  BDS
+  DEFENSE
+  SURVEILLANCE
+  SHARIAH
+}
+
+enum Verdict {
+  PASS
+  REVIEW
+  EXCLUDED
+}

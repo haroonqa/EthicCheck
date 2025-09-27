@@ -1,0 +1,59 @@
+---
+alwaysApply: true
+---y 
+## 4. Coding Style
+- Use **TypeScript** with async/await.
+- Follow existing patterns (see `afsc-scraper.ts` for scraper style).
+- Always return strongly typed objects, never `any`.
+- Follow Prisma schema types for `Company`, `Evidence`, `Source`, and `Tag`.
+
+---
+
+## 5. Functions & Endpoints
+- Do not invent new endpoints; only modify `/screen`, `/holdings`, or `/health` if explicitly asked.
+- Scrapers must return arrays of objects shaped consistently with existing scrapers.
+- Transformers must map source data to the Prisma schema types.
+- Loaders must ensure idempotency using hash or unique constraints.
+
+---
+
+## 6. Testing
+- Every new scraper or service must have a matching test file:
+  - Example: `bds-scraper.ts` → `test-bds-scraper.ts`.
+- Suggest a minimal test script if none exists.
+- Prefer real sample data (single page scrape) for validation.
+
+---
+
+## 7. Data Quality & Monitoring
+- **ALWAYS** use data quality services when creating/updating company records:
+  - Use `DataImportGuard.createCompanySafely()` instead of direct Prisma calls
+  - Use `TickerValidator.validateTickerAssignment()` before ticker updates
+  - Run `AutomatedMonitor.runMonitoring()` to check data health
+- **Ticker Format Rules**:
+  - Must be 1-10 characters long
+  - Uppercase letters, numbers, and hyphens only
+  - No country suffixes (.TA, .TO, .AS, etc.)
+  - Must be unique across all companies
+- **Monitoring Commands**:
+  - `npm run monitor` - Full monitoring report
+  - `npm run monitor:quick` - Quick health check
+  - `npm run monitor:metrics` - Data quality metrics only
+- **Data Quality Thresholds**:
+  - Ticker coverage: Aim for 80%+ (currently 38.6%)
+  - Critical issues: 0 (system stops if >0)
+  - Warning issues: <3 for "good" health status
+
+---
+
+## 8. Communication
+- If something is ambiguous, **ask for clarification instead of inventing code**.
+- Use `// TODO` for placeholders.
+- Never apologize or write fluff in code comments; keep them practical.
+
+---
+
+## 9. Output Format
+- Always output complete code blocks that can compile directly.
+- No partial edits or "…".
+- Maintain existing formatting (Prettier/TS defaults).
