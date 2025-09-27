@@ -2,7 +2,6 @@
   "name": "ethiccheck",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
   "dependencies": {
     "@types/node": "^16.18.0",
     "@types/react-dom": "^18.2.0",
