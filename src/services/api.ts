@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://ethiccheck-api.railway.app';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
 
 // BDS Category Types
 export type BdsCategory = 
@@ -74,7 +74,7 @@ export const api = {
 
   // Run screening
   async runScreening(request: ScreeningRequest): Promise<ScreeningResponse> {
-    const response = await fetch(`${API_BASE_URL}/test-screen`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/screen`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
