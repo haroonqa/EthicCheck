@@ -268,10 +268,10 @@ export class ScreeningEngine {
     // Screen each category
     let overallStatus: 'pass' | 'review' | 'excluded' = 'pass';
     
-    for (const [category, evidence] of evidenceByCategory) {
+    evidenceByCategory.forEach((evidence, category) => {
       // Skip categories not requested in filter
       if (categories && categories.length > 0 && !categories.includes(category)) {
-        continue;
+        return;
       }
 
       const categoryResult = this.screenBdsCategory(category, evidence);
@@ -283,7 +283,7 @@ export class ScreeningEngine {
       } else if (categoryResult.status === 'review' && overallStatus !== 'excluded') {
         overallStatus = 'review';
       }
-    }
+    });
 
     // Collect reasons from all categories
     for (const categoryStatus of categoryStatuses) {
@@ -678,7 +678,7 @@ export class ScreeningEngine {
         return this.getConservativeEstimates(symbol);
       }
       
-      const data = await response.json();
+      const data = await response.json() as any;
       
       if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
         return this.getConservativeEstimates(symbol);
