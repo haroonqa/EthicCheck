@@ -150,7 +150,7 @@ export class WhoProfitsScraper {
       }
 
       // Process each company element
-      companyElements.each((index, element) => {
+      companyElements.each((index: number, element: any) => {
         try {
           const company = this.parseCompanyElement($, element, selectorUsed);
           if (company) {
