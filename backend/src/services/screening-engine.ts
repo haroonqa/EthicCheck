@@ -708,7 +708,7 @@ export class ScreeningEngine {
         isEstimated: true // Flag to indicate this is estimated data
       };
     } catch (error) {
-      console.log(`Yahoo Finance API failed for ${symbol}:`, error.message);
+      console.log(`Yahoo Finance API failed for ${symbol}:`, (error as Error).message);
       return this.getConservativeEstimates(symbol);
     }
   }
