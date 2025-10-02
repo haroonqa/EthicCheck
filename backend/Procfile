@@ -1,4 +1,1 @@
-web: node simple-api.js
-
-
-
+web: npm run dev
