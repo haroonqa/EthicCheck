@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://web-production-2e1d1.up.railway.app';
 
 // BDS Category Types
 export type BdsCategory = 

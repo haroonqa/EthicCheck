@@ -87,25 +87,61 @@ app.get('/health', (req, res) => {
 // Simple screening endpoint for testing
 app.post('/api/v1/screen', async (req, res) => {
   try {
-    const { tickers } = req.body;
+    const { symbols, filters } = req.body;
     
-    if (!tickers || !Array.isArray(tickers)) {
+    if (!symbols || !Array.isArray(symbols)) {
       return res.status(400).json({
-        error: 'Invalid request. Please provide an array of tickers.',
+        error: 'Invalid request format',
+        details: [{
+          code: 'invalid_type',
+          expected: 'array',
+          received: 'undefined',
+          path: ['symbols'],
+          message: 'Required'
+        }],
+        requestId: require('uuid').v4()
       });
     }
 
-    // Simple response for now
-    const results = tickers.map(ticker => ({
-      ticker,
-      status: 'screened',
-      message: 'Screening completed',
-      timestamp: new Date().toISOString(),
+    if (!filters || typeof filters !== 'object') {
+      return res.status(400).json({
+        error: 'Invalid request format',
+        details: [{
+          code: 'invalid_type',
+          expected: 'object',
+          received: 'undefined',
+          path: ['filters'],
+          message: 'Required'
+        }],
+        requestId: require('uuid').v4()
+      });
+    }
+
+    // Simple response for now - return mock screening results
+    const rows = symbols.map(symbol => ({
+      symbol,
+      company: `${symbol} Inc.`,
+      statuses: {
+        bds: {
+          overall: 'pass',
+          categories: []
+        },
+        defense: 'pass',
+        shariah: 'pass'
+      },
+      finalVerdict: 'PASS',
+      reasons: ['No violations found'],
+      confidence: 'High',
+      asOfRow: new Date().toISOString(),
+      sources: [{ label: 'EthicCheck Database', url: 'https://ethiccheck.com' }],
+      auditId: require('uuid').v4()
     }));
 
     res.json({
-      results,
-      timestamp: new Date().toISOString(),
+      requestId: require('uuid').v4(),
+      asOf: new Date().toISOString(),
+      rows,
+      warnings: []
     });
   } catch (error) {
     console.error('Screening error:', error);
