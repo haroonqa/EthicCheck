@@ -51,6 +51,7 @@
     "**/*.spec.ts"
   ],
   "ts-node": {
-    "require": ["tsconfig-paths/register"]
+    "transpileOnly": true,
+    "skipIgnore": true
   }
 }
