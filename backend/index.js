@@ -24,9 +24,9 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration
+// CORS configuration - allow all origins for now
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  origin: true, // Allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -80,9 +80,18 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Test endpoint
+app.get('/test', (req, res) => {
+  res.json({
+    message: 'Backend is working!',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Simple screening endpoint for testing
 app.post('/api/v1/screen', async (req, res) => {
   try {
+    console.log('Screening request received:', req.body);
     const { symbols, filters } = req.body;
     
     if (!symbols || !Array.isArray(symbols)) {
