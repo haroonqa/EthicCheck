@@ -74,10 +74,31 @@ export const api = {
 
   // Run screening
   async runScreening(request: ScreeningRequest): Promise<ScreeningResponse> {
-    // Force using mock data for now since backend is having issues
-    console.log('Using mock screening data for:', request.symbols);
+    console.log('Attempting to connect to real backend for:', request.symbols);
     
-    // Always use mock data for now
+    // Try real API first
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/screen`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (response.ok) {
+        const realData = await response.json();
+        console.log('Got real data from backend:', realData);
+        return realData;
+      } else {
+        console.log('Backend returned error, using mock data');
+      }
+    } catch (error) {
+      console.log('Backend connection failed, using mock data:', error);
+    }
+    
+    // Fallback to mock data
+    console.log('Using mock screening data for:', request.symbols);
     return new Promise((resolve) => {
       setTimeout(() => {
       
