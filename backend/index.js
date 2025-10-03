@@ -3,14 +3,10 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const { PrismaClient } = require('@prisma/client');
 const dotenv = require('dotenv');
 
 // Load environment variables
 dotenv.config();
-
-// Initialize Prisma
-const prisma = new PrismaClient();
 
 // Create Express app
 const app = express();
@@ -172,28 +168,14 @@ app.use((error, req, res, next) => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
-  
-  try {
-    await prisma.$disconnect();
-    process.exit(0);
-  } catch (error) {
-    console.error('Error during shutdown:', error);
-    process.exit(1);
-  }
+  process.exit(0);
 });
 
-process.on('SIGINT', async () => {
+process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
-  
-  try {
-    await prisma.$disconnect();
-    process.exit(0);
-  } catch (error) {
-    console.error('Error during shutdown:', error);
-    process.exit(1);
-  }
+  process.exit(0);
 });
 
 // Start server
