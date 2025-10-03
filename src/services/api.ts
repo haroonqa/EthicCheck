@@ -98,7 +98,7 @@ export const api = {
                 shariah: 'pass'
               },
               finalVerdict: 'PASS',
-              reasons: ['No violations found'],
+              reasons: [],
               confidence: 'High',
               asOfRow: new Date().toISOString(),
               sources: [{ label: 'EthicCheck Database', url: 'https://ethiccheck.com' }],
@@ -159,6 +159,11 @@ export const api = {
                 
                 result.reasons.push(`Financial ratios: Debt ${(debt/marketCap*100).toFixed(1)}%, Cash ${(cashSecurities/marketCap*100).toFixed(1)}%, Receivables ${(receivables/marketCap*100).toFixed(1)}%`);
               }
+            }
+
+            // Add "No violations found" if no violations were detected
+            if (result.reasons.length === 0) {
+              result.reasons.push('No violations found');
             }
 
             return result;
