@@ -74,37 +74,109 @@ export const api = {
 
   // Run screening
   async runScreening(request: ScreeningRequest): Promise<ScreeningResponse> {
-    // Always return mock response for now
-    console.log('Using mock screening response for:', request.symbols);
+    // Force using mock data for now since backend is having issues
+    console.log('Using mock screening data for:', request.symbols);
     
-    const mockResponse: ScreeningResponse = {
-      requestId: Math.random().toString(36).substr(2, 9),
-      asOf: new Date().toISOString(),
-      rows: request.symbols.map(symbol => ({
-        symbol,
-        company: `${symbol} Inc.`,
-        statuses: {
-          bds: {
-            overall: 'pass',
-            categories: []
-          },
-          defense: 'pass',
-          shariah: 'pass'
-        },
-        finalVerdict: 'PASS',
-        reasons: ['No violations found'],
-        confidence: 'High',
-        asOfRow: new Date().toISOString(),
-        sources: [{ label: 'EthicCheck Database', url: 'https://ethiccheck.com' }],
-        auditId: Math.random().toString(36).substr(2, 9)
-      })),
-      warnings: []
-    };
+    // Always use mock data for now
+    return new Promise((resolve) => {
+      setTimeout(() => {
+      
+        // Realistic mock data with real screening logic
+        const mockResponse: ScreeningResponse = {
+          requestId: Math.random().toString(36).substr(2, 9),
+          asOf: new Date().toISOString(),
+          rows: request.symbols.map(symbol => {
+            const upperSymbol = symbol.toUpperCase();
+            
+            // Start with clean result
+            let result = {
+              symbol,
+              company: `${symbol} Inc.`,
+              statuses: {
+                bds: { overall: 'pass' as const, categories: [] },
+                defense: 'pass' as const,
+                surveillance: 'pass' as const,
+                shariah: 'pass' as const
+              },
+              finalVerdict: 'PASS' as const,
+              reasons: ['No violations found'],
+              confidence: 'High' as const,
+              asOfRow: new Date().toISOString(),
+              sources: [{ label: 'EthicCheck Database', url: 'https://ethiccheck.com' }],
+              auditId: Math.random().toString(36).substr(2, 9)
+            };
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return mockResponse;
+            // Apply real screening logic based on symbol
+            
+            // BDS Screening - check for known BDS companies
+            if (request.filters.bds?.enabled) {
+              const bdsCompanies = ['CAT', 'DE', 'HON', 'JNJ', 'MCD', 'NKE', 'PFE', 'PG', 'UNH', 'VZ'];
+              if (bdsCompanies.includes(upperSymbol)) {
+                result.statuses.bds = {
+                  overall: 'excluded',
+                  categories: [{
+                    category: 'economic_exploitation' as const,
+                    status: 'excluded' as const,
+                    evidence: ['Company operates in occupied territories']
+                  }]
+                };
+                result.reasons.push('BDS violation: Economic exploitation in occupied territories');
+                result.finalVerdict = 'EXCLUDED';
+              }
+            }
+
+            // Defense Screening - check for known defense contractors
+            if (request.filters.defense) {
+              const defenseCompanies = ['LMT', 'RTX', 'NOC', 'GD', 'BA', 'HWM', 'LHX', 'TDG', 'LDOS', 'KBR'];
+              if (defenseCompanies.includes(upperSymbol)) {
+                result.statuses.defense = 'excluded';
+                result.reasons.push('Major defense contractor');
+                result.finalVerdict = 'EXCLUDED';
+              }
+            }
+
+            // Surveillance Screening - check for known surveillance companies
+            if (request.filters.surveillance) {
+              const surveillanceCompanies = ['META', 'GOOGL', 'AMZN', 'MSFT', 'NFLX', 'CRM', 'ORCL', 'ADBE', 'INTC', 'NVDA'];
+              if (surveillanceCompanies.includes(upperSymbol)) {
+                result.statuses.surveillance = 'excluded';
+                result.reasons.push('Surveillance technology provider');
+                result.finalVerdict = 'EXCLUDED';
+              }
+            }
+
+            // Shariah Screening - check for known non-compliant companies
+            if (request.filters.shariah) {
+              const haramCompanies = ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'AXP', 'USB', 'PNC', 'TFC']; // Banks
+              const highDebtCompanies = ['TSLA', 'UBER', 'LYFT', 'SNAP', 'TWTR']; // High debt companies
+              
+              if (haramCompanies.includes(upperSymbol)) {
+                result.statuses.shariah = 'excluded';
+                result.reasons.push('Banking activities (haram)');
+                result.finalVerdict = 'EXCLUDED';
+              } else if (highDebtCompanies.includes(upperSymbol)) {
+                result.statuses.shariah = 'excluded';
+                result.reasons.push('High debt ratio exceeds 33%');
+                result.finalVerdict = 'EXCLUDED';
+              } else {
+                // For other companies, simulate financial screening
+                const marketCap = 100000000000; // $100B
+                const debt = marketCap * 0.15; // 15% debt ratio (passes Shariah)
+                const cashSecurities = marketCap * 0.05; // 5% cash (passes Shariah)
+                const receivables = marketCap * 0.10; // 10% receivables (passes Shariah)
+                
+                result.reasons.push(`Financial ratios: Debt ${(debt/marketCap*100).toFixed(1)}%, Cash ${(cashSecurities/marketCap*100).toFixed(1)}%, Receivables ${(receivables/marketCap*100).toFixed(1)}%`);
+              }
+            }
+
+            return result;
+          }),
+          warnings: ['Using mock data - API unavailable']
+        };
+
+        resolve(mockResponse);
+      }, 1000); // Simulate API delay
+    });
   },
 
   // Get methodology for a specific filter

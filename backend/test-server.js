@@ -19,6 +19,14 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Test endpoint
+app.get('/test', (req, res) => {
+  res.json({
+    message: 'Backend is working!',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Simple screening endpoint
 app.post('/api/v1/screen', (req, res) => {
   console.log('Screening request:', req.body);
@@ -29,24 +37,14 @@ app.post('/api/v1/screen', (req, res) => {
     if (!symbols || !Array.isArray(symbols)) {
       return res.status(400).json({
         error: 'Invalid request format',
-        details: [{
-          code: 'invalid_type',
-          expected: 'array',
-          received: 'undefined',
-          path: ['symbols'],
-          message: 'Required'
-        }],
         requestId: Math.random().toString(36).substr(2, 9)
       });
     }
 
-    // Real screening logic based on known companies
-    const rows = [];
-    
-    for (const symbol of symbols) {
-      console.log(`Processing symbol: ${symbol}`);
+    // Simple screening logic
+    const rows = symbols.map(symbol => {
+      const upperSymbol = symbol.toUpperCase();
       
-      // Start with clean result
       let result = {
         symbol,
         company: `${symbol} Inc.`,
@@ -64,27 +62,17 @@ app.post('/api/v1/screen', (req, res) => {
         auditId: Math.random().toString(36).substr(2, 9)
       };
 
-      // Apply real screening logic based on symbol
-      const upperSymbol = symbol.toUpperCase();
-      
-      // BDS Screening - check for known BDS companies
+      // BDS Screening
       if (filters.bds?.enabled) {
         const bdsCompanies = ['CAT', 'DE', 'HON', 'JNJ', 'MCD', 'NKE', 'PFE', 'PG', 'UNH', 'VZ'];
         if (bdsCompanies.includes(upperSymbol)) {
-          result.statuses.bds = {
-            overall: 'excluded',
-            categories: [{
-              category: 'economic_exploitation',
-              status: 'excluded',
-              evidence: ['Company operates in occupied territories']
-            }]
-          };
+          result.statuses.bds = { overall: 'excluded', categories: [] };
           result.reasons.push('BDS violation: Economic exploitation in occupied territories');
           result.finalVerdict = 'EXCLUDED';
         }
       }
 
-      // Defense Screening - check for known defense contractors
+      // Defense Screening
       if (filters.defense) {
         const defenseCompanies = ['LMT', 'RTX', 'NOC', 'GD', 'BA', 'HWM', 'LHX', 'TDG', 'LDOS', 'KBR'];
         if (defenseCompanies.includes(upperSymbol)) {
@@ -94,7 +82,7 @@ app.post('/api/v1/screen', (req, res) => {
         }
       }
 
-      // Surveillance Screening - check for known surveillance companies
+      // Surveillance Screening
       if (filters.surveillance) {
         const surveillanceCompanies = ['META', 'GOOGL', 'AMZN', 'MSFT', 'NFLX', 'CRM', 'ORCL', 'ADBE', 'INTC', 'NVDA'];
         if (surveillanceCompanies.includes(upperSymbol)) {
@@ -104,32 +92,18 @@ app.post('/api/v1/screen', (req, res) => {
         }
       }
 
-      // Shariah Screening - check for known non-compliant companies
+      // Shariah Screening
       if (filters.shariah) {
-        const haramCompanies = ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'AXP', 'USB', 'PNC', 'TFC']; // Banks
-        const highDebtCompanies = ['TSLA', 'UBER', 'LYFT', 'SNAP', 'TWTR']; // High debt companies
-        
+        const haramCompanies = ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'AXP', 'USB', 'PNC', 'TFC'];
         if (haramCompanies.includes(upperSymbol)) {
           result.statuses.shariah = 'excluded';
           result.reasons.push('Banking activities (haram)');
           result.finalVerdict = 'EXCLUDED';
-        } else if (highDebtCompanies.includes(upperSymbol)) {
-          result.statuses.shariah = 'excluded';
-          result.reasons.push('High debt ratio exceeds 33%');
-          result.finalVerdict = 'EXCLUDED';
-        } else {
-          // For other companies, simulate financial screening
-          const marketCap = 100000000000; // $100B
-          const debt = marketCap * 0.15; // 15% debt ratio (passes Shariah)
-          const cashSecurities = marketCap * 0.05; // 5% cash (passes Shariah)
-          const receivables = marketCap * 0.10; // 10% receivables (passes Shariah)
-          
-          result.reasons.push(`Financial ratios: Debt ${(debt/marketCap*100).toFixed(1)}%, Cash ${(cashSecurities/marketCap*100).toFixed(1)}%, Receivables ${(receivables/marketCap*100).toFixed(1)}%`);
         }
       }
 
-      rows.push(result);
-    }
+      return result;
+    });
 
     res.json({
       requestId: Math.random().toString(36).substr(2, 9),
@@ -148,7 +122,7 @@ app.post('/api/v1/screen', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Simple EthicCheck API server running on port ${PORT} - Updated with real screening logic`);
+  console.log(`Test EthicCheck API server running on port ${PORT}`);
 });
 
 module.exports = app;
