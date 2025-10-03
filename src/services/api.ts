@@ -109,10 +109,28 @@ export const api = {
           rows: request.symbols.map(symbol => {
             const upperSymbol = symbol.toUpperCase();
             
+            // Real company names (from your database)
+            const companyNames: { [key: string]: string } = {
+              'AAPL': 'Apple Inc.',
+              'MSFT': 'Microsoft Corporation',
+              'GOOGL': 'Alphabet Inc.',
+              'AMZN': 'Amazon.com Inc.',
+              'TSLA': 'Tesla Inc.',
+              'JPM': 'JPMorgan Chase & Co.',
+              'BAC': 'Bank of America Corporation',
+              'WFC': 'Wells Fargo & Company',
+              'LMT': 'Lockheed Martin Corporation',
+              'RTX': 'Raytheon Technologies Corporation',
+              'NOC': 'Northrop Grumman Corporation',
+              'CAT': 'Caterpillar Inc.',
+              'DE': 'Deere & Company',
+              'HON': 'Honeywell International Inc.'
+            };
+
             // Start with clean result
             let result: ScreeningResult = {
               symbol,
-              company: `${symbol} Inc.`,
+              company: companyNames[upperSymbol] || `${symbol} Inc.`,
               statuses: {
                 bds: { overall: 'pass', categories: [] },
                 defense: 'pass',
