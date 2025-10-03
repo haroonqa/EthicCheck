@@ -99,7 +99,7 @@ app.post('/api/v1/screen', async (req, res) => {
           path: ['symbols'],
           message: 'Required'
         }],
-        requestId: require('uuid').v4()
+        requestId: Math.random().toString(36).substr(2, 9)
       });
     }
 
@@ -113,7 +113,7 @@ app.post('/api/v1/screen', async (req, res) => {
           path: ['filters'],
           message: 'Required'
         }],
-        requestId: require('uuid').v4()
+        requestId: Math.random().toString(36).substr(2, 9)
       });
     }
 
@@ -134,11 +134,11 @@ app.post('/api/v1/screen', async (req, res) => {
       confidence: 'High',
       asOfRow: new Date().toISOString(),
       sources: [{ label: 'EthicCheck Database', url: 'https://ethiccheck.com' }],
-      auditId: require('uuid').v4()
+      auditId: Math.random().toString(36).substr(2, 9)
     }));
 
     res.json({
-      requestId: require('uuid').v4(),
+      requestId: Math.random().toString(36).substr(2, 9),
       asOf: new Date().toISOString(),
       rows,
       warnings: []
