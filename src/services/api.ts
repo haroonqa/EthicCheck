@@ -74,7 +74,9 @@ export const api = {
 
   // Run screening
   async runScreening(request: ScreeningRequest): Promise<ScreeningResponse> {
-    // Temporary mock response while backend is being fixed
+    // Always return mock response for now
+    console.log('Using mock screening response for:', request.symbols);
+    
     const mockResponse: ScreeningResponse = {
       requestId: Math.random().toString(36).substr(2, 9),
       asOf: new Date().toISOString(),
@@ -99,24 +101,9 @@ export const api = {
       warnings: []
     };
 
-    // Try real API first, fallback to mock
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/screen`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-
-      if (response.ok) {
-        return response.json();
-      }
-    } catch (error) {
-      console.log('API failed, using mock response:', error);
-    }
-
-    // Return mock response
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     return mockResponse;
   },
 
